@@ -1,0 +1,77 @@
+from functools import lru_cache
+import string
+
+LETTERS = string.ascii_uppercase
+
+def solve(p1, p2):
+    n, m = len(p1), len(p2)
+
+    @lru_cache(None)
+    def dp(i, j):
+      
+        if i == n and j == m:
+            return ""  
+        if i < n and p1[i] == '*':
+           
+           
+            results = []
+          
+            res1 = dp(i + 1, j)
+            if res1 is not None:
+                results.append(res1)
+            for c in LETTERS:
+                res2 = dp(i, j)
+                if j < m and (p2[j] == '*' or p2[j] == '?' or p2[j] == c):
+                    s = dp(i, j + 1)
+                    if s is not None:
+                        results.append(c + s)
+            return min(results, default=None, key=len)
+
+        if j < m and p2[j] == '*':
+           
+            results = []
+            res1 = dp(i, j + 1)
+            if res1 is not None:
+                results.append(res1)
+            for c in LETTERS:
+                res2 = dp(i, j)
+                if i < n and (p1[i] == '*' or p1[i] == '?' or p1[i] == c):
+                    s = dp(i + 1, j)
+                    if s is not None:
+                        results.append(c + s)
+            return min(results, default=None, key=len)
+
+     
+        if i < n and j < m:
+            chars1 = []
+            if p1[i] == '?':
+                chars1 = list(LETTERS)
+            elif p1[i] == '*':
+               
+                pass
+            else:
+                chars1 = [p1[i]]
+
+            chars2 = []
+            if p2[j] == '?':
+                chars2 = list(LETTERS)
+            elif p2[j] == '*':
+              
+                pass
+            else:
+                chars2 = [p2[j]]
+
+            common = set(chars1) & set(chars2)
+            results = []
+            for c in common:
+                s = dp(i + 1, j + 1)
+                if s is not None:
+                    results.append(c + s)
+            return min(results, default=None, key=len)
+
+        return None  
+    result = dp(0, 0)
+    return result if result is not None else "-1"
+
+print(solve("?A", "B?"))        # ➜ "BA"
+print(solve("?A*", "*ABC"))
